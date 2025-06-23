@@ -1,8 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,70 +16,81 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// TODO: Connect to an API function
-// import { registerBusinessUnit } from "@/lib/api";
 
 const formSchema = z.object({
-  businessUnitName: z.string().min(2, "Name must be at least 2 characters."),
-  location: z.string().min(3, "Location must be at least 3 characters."),
+  BUnitName: z.string().min(2, "Business unit name must be at least 2 characters."),
+  Location: z.string().min(2, "Location must be at least 2 characters."),
 });
 
-export function RegisterBusinessUnitForm() {
+export default function RegisterBusinessUnitForm() {
+  const [status, setStatus] = useState(null);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      businessUnitName: "",
-      location: "",
+      BUnitName: "",
+      Location: "",
     },
   });
 
-  async function onSubmit(values) {
-    console.log("Registering Business Unit:", values);
-    // await registerBusinessUnit(values);
-    // TODO: Add toast notification for success
-    form.reset();
-  }
+  const onSubmit = async (values) => {
+    setStatus({ message: "Registering...", type: "info" });
+    try {
+      const response = await axios.post("/api/business-units", values);
+      setStatus({ message: response.data.message, type: "success" });
+      form.reset();
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "An error occurred.";
+      setStatus({ message: errorMessage, type: "error" });
+    }
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Register Standalone Business Unit</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="businessUnitName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Unit Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Downtown Branch" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <FormControl>
-                    <Input placeholder="123 Main St, Anytown" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Register Unit</Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4">Register Standalone Business Unit</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="BUnitName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Business Unit Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Downtown Branch" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="Location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <Input placeholder="123 Main St, Anytown" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Registering..." : "Register Unit"}
+          </Button>
+        </form>
+      </Form>
+      {status && (
+        <p className={`mt-4 text-sm ${
+            status.type === "success" ? "text-green-600" :
+            status.type === "error" ? "text-red-600" : "text-gray-600"
+          }`}
+        >
+          {status.message}
+        </p>
+      )}
+    </div>
   );
 }
