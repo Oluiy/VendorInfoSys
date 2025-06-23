@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { AddProductForm } from "@/components/forms/AddProductForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import axios from "axios";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -36,9 +37,14 @@ const VendorDashboardPage = () => {
   // Mock product data for the catalog
   const products = [
     { id: 1, name: "Head Phones", price: 1300, stock: 150 },
-    { id: 2, name: "Oraimo Ear Piece", price: 9.99, stock: 300 },
-    { id: 3, name: "Paper Tape", price: 12.5, stock: 200 },
+    { id: 2, name: "Oraimo Ear Piece", price: 2000, stock: 300 },
+    { id: 3, name: "Paper Tape", price: 700, stock: 200 },
+    { id: 4, name: "Books", price: 500, stock: 20}
   ];
+
+  // products = axios.get(
+  //   'api/products/{id}'
+  // )
 
   return (
     <motion.div

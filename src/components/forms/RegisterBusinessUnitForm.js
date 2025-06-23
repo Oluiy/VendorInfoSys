@@ -58,7 +58,7 @@ export default function RegisterBusinessUnitForm() {
               <FormItem>
                 <FormLabel>Business Unit Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Downtown Branch" {...field} />
+                  <Input placeholder="Primal Confectionaries" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -71,7 +71,7 @@ export default function RegisterBusinessUnitForm() {
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input placeholder="123 Main St, Anytown" {...field} />
+                  <Input placeholder="4, Honour Way." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

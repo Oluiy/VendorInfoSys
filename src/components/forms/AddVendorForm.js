@@ -60,7 +60,7 @@ export function AddVendorForm() {
                 <FormItem>
                   <FormLabel>Vendor Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Acme Inc." {...field} />
+                    <Input placeholder="Anthony Randall" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -73,7 +73,7 @@ export function AddVendorForm() {
                 <FormItem>
                   <FormLabel>Vendor Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="contact@acme.com" {...field} />
+                    <Input placeholder="contact@gmail.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -86,7 +86,7 @@ export function AddVendorForm() {
                 <FormItem>
                   <FormLabel>Vendor Phone No.</FormLabel>
                   <FormControl>
-                    <Input placeholder="+1 234 567 890" {...field} />
+                    <Input placeholder="+234 8196 7854 220" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

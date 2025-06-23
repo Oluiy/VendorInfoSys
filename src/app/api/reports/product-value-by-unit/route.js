@@ -17,4 +17,4 @@ export async function GET(request) {
   } catch (e) {
     return NextResponse.json({ message: e.message }, { status: 500 });
   }
-} 
+}
