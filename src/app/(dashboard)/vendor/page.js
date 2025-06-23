@@ -35,9 +35,9 @@ const itemVariants = {
 const VendorDashboardPage = () => {
   // Mock product data for the catalog
   const products = [
-    { id: 1, name: "Eco-Friendly Water Bottle", price: 15.99, stock: 150 },
-    { id: 2, name: "Recycled Paper Notebook", price: 9.99, stock: 300 },
-    { id: 3, name: "Bamboo Toothbrush Set", price: 12.5, stock: 200 },
+    { id: 1, name: "Head Phones", price: 1300, stock: 150 },
+    { id: 2, name: "Oraimo Ear Piece", price: 9.99, stock: 300 },
+    { id: 3, name: "Paper Tape", price: 12.5, stock: 200 },
   ];
 
   return (
@@ -74,7 +74,7 @@ const VendorDashboardPage = () => {
                       Stock: {product.stock}
                     </p>
                   </div>
-                  <p className="font-bold">${product.price}</p>
+                  <p className="font-bold">₦{product.price}</p>
                 </div>
               ))}
             </CardContent>
