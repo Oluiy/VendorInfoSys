@@ -1,9 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AddProductForm } from "@/components/forms/AddProductForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProductsWithDetails } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/shared/ProtectedRoute";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -33,12 +36,27 @@ const itemVariants = {
 };
 
 const VendorDashboardPage = () => {
-  // Mock product data for the catalog
-  const products = [
-    { id: 1, name: "Head Phones", price: 1300, stock: 150 },
-    { id: 2, name: "Oraimo Ear Piece", price: 9.99, stock: 300 },
-    { id: 3, name: "Paper Tape", price: 12.5, stock: 200 },
-  ];
+  const { user } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    setError("");
+    getProductsWithDetails()
+      .then((allProducts) => {
+        // Filter by vendor ID (assuming product.vendorId or product.VendorID)
+        const vendorId = user.id || user.vendorId || user.VendorID;
+        const filtered = allProducts.filter(
+          (p) => p.vendorId === vendorId || p.VendorID === vendorId
+        );
+        setProducts(filtered);
+      })
+      .catch(() => setError("Failed to load products."))
+      .finally(() => setLoading(false));
+  }, [user]);
 
   return (
     <motion.div
@@ -63,20 +81,32 @@ const VendorDashboardPage = () => {
               <CardTitle>Your Product Catalog</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex justify-between items-center p-2 border rounded-lg"
-                >
-                  <div>
-                    <p className="font-semibold">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Stock: {product.stock}
+              {loading ? (
+                <div>Loading...</div>
+              ) : error ? (
+                <div className="text-red-500">{error}</div>
+              ) : products.length === 0 ? (
+                <div>No products found.</div>
+              ) : (
+                products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex justify-between items-center p-2 border rounded-lg"
+                  >
+                    <div>
+                      <p className="font-semibold">
+                        {product.name || product.ProductName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {product.stock ? `Stock: ${product.stock}` : null}
+                      </p>
+                    </div>
+                    <p className="font-bold">
+                      ${product.price || product.Price}
                     </p>
                   </div>
-                  <p className="font-bold">₦{product.price}</p>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -85,4 +115,10 @@ const VendorDashboardPage = () => {
   );
 };
 
-export default VendorDashboardPage;
+export default function VendorProtected() {
+  return (
+    <ProtectedRoute role="vendor">
+      <VendorDashboardPage />
+    </ProtectedRoute>
+  );
+}

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { login as loginApi } from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ const formSchema = z.object({
 
 export function VendorLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const { login } = useAuth();
 
   const form = useForm({
@@ -37,13 +39,19 @@ export function VendorLoginForm() {
 
   async function onSubmit(values) {
     setIsLoading(true);
-    console.log("Vendor login attempt:", values);
-    // Mock API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log("Vendor login successful");
-    login({ role: "vendor", name: "Mock Vendor" });
-    setIsLoading(false);
-    // TODO: Handle actual login and redirection
+    setError("");
+    try {
+      const user = await loginApi({
+        role: "vendor",
+        id: values.vendorId,
+        password: values.password,
+      });
+      login({ ...user, role: "vendor" });
+    } catch (err) {
+      setError("Invalid Vendor ID or password");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -75,6 +83,7 @@ export function VendorLoginForm() {
             </FormItem>
           )}
         />
+        {error && <div className="text-red-500 text-sm">{error}</div>}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Login
