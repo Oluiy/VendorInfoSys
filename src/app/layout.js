@@ -1,14 +1,12 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/shared/Navbar";
+import PageTransition from "@/components/shared/PageTransition";
+import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-sans",
 });
 
 export const metadata = {
@@ -19,10 +17,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <Providers>
+          <Navbar />
+          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-24">
+            <PageTransition>{children}</PageTransition>
+          </main>
+        </Providers>
       </body>
     </html>
   );

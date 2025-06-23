@@ -20,6 +20,5 @@ export async function query({ query, values = [] }) {
     return results;
   } catch (error) {
     throw Error(error.message);
-    return { error };
   }
 } 
