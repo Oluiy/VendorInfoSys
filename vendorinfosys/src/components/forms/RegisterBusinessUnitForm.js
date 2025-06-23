@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,29 +15,38 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// TODO: Connect to an API function
-// import { registerBusinessUnit } from "@/lib/api";
+import { createBusinessUnit } from "@/lib/api";
 
 const formSchema = z.object({
-  businessUnitName: z.string().min(2, "Name must be at least 2 characters."),
-  location: z.string().min(3, "Location must be at least 3 characters."),
+  BUnitName: z.string().min(2, "Name must be at least 2 characters."),
+  Location: z.string().min(3, "Location must be at least 3 characters."),
 });
 
 export function RegisterBusinessUnitForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      businessUnitName: "",
-      location: "",
+      BUnitName: "",
+      Location: "",
     },
   });
 
   async function onSubmit(values) {
-    console.log("Registering Business Unit:", values);
-    // await registerBusinessUnit(values);
-    // TODO: Add toast notification for success
-    form.reset();
+    setIsLoading(true);
+    setError("");
+    setSuccess(false);
+    try {
+      await createBusinessUnit(values);
+      setSuccess(true);
+      form.reset();
+    } catch (err) {
+      setError("Failed to register business unit.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -50,12 +59,12 @@ export function RegisterBusinessUnitForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="businessUnitName"
+              name="BUnitName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Business Unit Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Downtown Branch" {...field} />
+                    <Input placeholder="Maron Pancakes" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -63,18 +72,26 @@ export function RegisterBusinessUnitForm() {
             />
             <FormField
               control={form.control}
-              name="location"
+              name="Location"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input placeholder="123 Main St, Anytown" {...field} />
+                    <Input placeholder="Infront of Cafeteria" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Register Unit</Button>
+            {success && (
+              <div className="text-green-600 text-sm">
+                Business unit registered!
+              </div>
+            )}
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Registering..." : "Register Unit"}
+            </Button>
           </form>
         </Form>
       </CardContent>

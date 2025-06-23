@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,30 +18,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addVendor } from "@/lib/api";
 
 const formSchema = z.object({
-  vendorName: z.string().min(2, "Name must be at least 2 characters."),
-  vendorPhoneNo: z.string().min(10, "Please enter a valid phone number."),
-  vendorEmail: z.string().email("Invalid email address."),
+  VendorName: z.string().min(2, "Name must be at least 2 characters."),
+  VendorPhoneNo: z.string().min(7, "Please enter a valid phone number."),
+  VendorEmail: z.string().email("Invalid email address."),
 });
 
 export function AddVendorForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      vendorName: "",
-      vendorPhoneNo: "",
-      vendorEmail: "",
+      VendorName: "",
+      VendorPhoneNo: "",
+      VendorEmail: "",
     },
   });
 
   async function onSubmit(values) {
-    console.log("Submitting vendor:", values);
+    setIsLoading(true);
+    setError("");
+    setSuccess(false);
     try {
       await addVendor(values);
-      // TODO: Add toast notification for success
+      setSuccess(true);
       form.reset();
-    } catch (error) {
-      console.error("Failed to add vendor", error);
-      // TODO: Add toast notification for error
+    } catch (err) {
+      setError("Failed to onboard vendor.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -55,7 +61,7 @@ export function AddVendorForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="vendorName"
+              name="VendorName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Vendor Name</FormLabel>
@@ -68,7 +74,7 @@ export function AddVendorForm() {
             />
             <FormField
               control={form.control}
-              name="vendorEmail"
+              name="VendorEmail"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Vendor Email</FormLabel>
@@ -81,18 +87,26 @@ export function AddVendorForm() {
             />
             <FormField
               control={form.control}
-              name="vendorPhoneNo"
+              name="VendorPhoneNo"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Vendor Phone No.</FormLabel>
                   <FormControl>
-                    <Input placeholder="+1 234 567 890" {...field} />
+                    <Input placeholder="+2348061374153" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Add Vendor</Button>
+            {success && (
+              <div className="text-green-600 text-sm">
+                Vendor onboarded successfully!
+              </div>
+            )}
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Onboarding..." : "Add Vendor"}
+            </Button>
           </form>
         </Form>
       </CardContent>

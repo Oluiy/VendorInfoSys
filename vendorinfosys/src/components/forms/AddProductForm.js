@@ -93,7 +93,7 @@ export function AddProductForm() {
                 <FormItem>
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="29.99" {...field} />
+                    <Input type="number" placeholder="₦2000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
