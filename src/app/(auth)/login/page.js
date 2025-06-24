@@ -52,7 +52,7 @@ const AdminRegisterForm = ({ onSwitchToLogin }) => {
     <div className="space-y-6">
       <div className="space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Register as Admin Officer
+          Register as an Admin Officer
         </h1>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -86,7 +86,7 @@ const AdminRegisterForm = ({ onSwitchToLogin }) => {
           <Input
             id="OfficerPhoneNo"
             {...register("OfficerPhoneNo")}
-            placeholder="+1234567890"
+            placeholder="+2349056789780"
           />
           {errors.OfficerPhoneNo && (
             <p className="text-sm text-red-500">
