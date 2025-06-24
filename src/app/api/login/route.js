@@ -1,78 +1,55 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
-
-async function createSession(userId, userRole) {
-  const sessionToken = crypto.randomBytes(48).toString("hex");
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
-
-  await query({
-    query: `
-      INSERT INTO Sessions (SessionToken, UserID, UserRole, ExpiresAt) 
-      VALUES (?, ?, ?, ?)
-    `,
-    values: [sessionToken, userId, userRole, expiresAt],
-  });
-
-  return sessionToken;
-}
 
 export async function POST(request) {
   const body = await request.json();
-  const { vendorID, adminID, password } = body;
+  const { ADMID, MGRID, password } = body;
 
   try {
-    let user;
-    let userRole;
+    let user = null;
+    let userRole = null;
 
-    if (vendorID) {
-      // Handle Vendor Login
-      userRole = 'vendor';
+    // Admin login
+    if (ADMID) {
       const results = await query({
-        query: "SELECT * FROM Vendor WHERE VendorID = ?",
-        values: [vendorID],
+        query: "SELECT OfficerID as id, OfficerPassword as password FROM AdminOfficer WHERE OfficerID = ?",
+        values: [ADMID],
       });
-      if (results.length === 0) {
-        return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+      if (results.length > 0) {
+        user = results[0];
+        userRole = "admin";
       }
-      user = results[0];
-    } else if (adminID) {
-      // Handle Admin Officer Login
-      userRole = 'admin';
+    }
+
+    // Manager login
+    if (!user && MGRID) {
       const results = await query({
-        query: "SELECT * FROM AdminOfficer WHERE OfficerID = ?",
-        values: [adminID],
+        query: "SELECT ManagerID as id, Password as password FROM Manager WHERE ManagerID = ?",
+        values: [MGRID],
       });
-      if (results.length === 0) {
-        return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+      if (results.length > 0) {
+        user = results[0];
+        userRole = "manager";
       }
-      user = results[0];
-    } else {
-      return NextResponse.json(
-        { message: "vendorID or adminID must be provided" },
-        { status: 400 }
-      );
+    }
+
+    if (!user) {
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
     // Verify password
-    const passwordMatch = await bcrypt.compare(password, user.Password);
+    const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
-    
-    // Create session
-    const userId = user.VendorID || user.OfficerID;
-    const sessionToken = await createSession(userId, userRole);
 
     return NextResponse.json({
       message: "Login successful",
-      token: sessionToken,
       role: userRole,
-      userId: userId,
+      userId: user.id,
     });
-
   } catch (e) {
     return NextResponse.json({ message: e.message }, { status: 500 });
   }
-} 
+}

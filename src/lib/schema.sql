@@ -33,6 +33,7 @@ CREATE TABLE AdminOfficer (
 CREATE TABLE Employee (
     EmployeeID INT AUTO_INCREMENT PRIMARY KEY,
     EmployeeName VARCHAR(255) NOT NULL,
+    Password VARCHAR(255) NOT NULL, -- Passwords should be hashed
     EmployeeEmailAddress VARCHAR(255) UNIQUE,
     EmployeeOnboardDate DATE,
     OfficerID INT, -- Supervising Officer
@@ -109,9 +110,12 @@ CREATE TABLE Users (
 -- );
 
 -- -- Managers table, linked to Business Units
--- CREATE TABLE Manager (
---     ManagerID INT AUTO_INCREMENT PRIMARY KEY,
---     ManagerName VARCHAR(255) NOT NULL,
---     BUnitID INT,
---     FOREIGN KEY (BUnitID) REFERENCES BusinessUnit(BUnitID) ON DELETE SET NULL
--- ); 
+CREATE TABLE Manager (
+    ManagerID VARCHAR(15) PRIMARY KEY,
+    ManagerName VARCHAR(150) NOT NULL,
+    Password VARCHAR(255) NOT NULL, -- Passwords should be hashed
+    ManagerEmailAddress VARCHAR(150) UNIQUE,
+    ManagerPhoneNo VARCHAR(20),
+    OfficerID INT NULL,
+    FOREIGN KEY (OfficerID) REFERENCES AdminOfficer(OfficerID) ON DELETE SET NULL
+); 

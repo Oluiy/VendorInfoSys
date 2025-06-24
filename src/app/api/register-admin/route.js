@@ -5,10 +5,10 @@ import bcrypt from "bcryptjs";
 export async function POST(request) {
   try {
     const { OfficerName, OfficerEmailAddress, OfficerPhoneNo, OfficerPassword } = await request.json();
-
     const hashedPassword = await bcrypt.hash(OfficerPassword, 10);
 
-    await query({
+    // Insert officer
+    const insertResult = await query({
       query: `
         INSERT INTO AdminOfficer (OfficerName, OfficerEmailAddress, OfficerPhoneNo, OfficerPassword)
         VALUES (?, ?, ?, ?)
@@ -16,17 +16,28 @@ export async function POST(request) {
       values: [OfficerName, OfficerEmailAddress, OfficerPhoneNo, hashedPassword],
     });
 
-
-    const getId = await query({
-      query: "SELECT LAST_INSERT_ID() as id",
-      values: [],
-    });
-    const numericId = getId[0]?.id;
+    let numericId = insertResult.insertId
+    if (!numericId) {
+      const getId = await query({
+        query: "SELECT LAST_INSERT_ID() as id",
+        values: [],
+      });
+      numericId = getId[0]?.id;
+    }
     const OfficerID = "ADM" + numericId;
-    await query({
+
+    // Log for debugging
+    console.log("Updating OfficerID for id:", numericId, "to", OfficerID);
+
+    // Update OfficerID
+    const updateResult = await query({
       query: "UPDATE AdminOfficer SET OfficerID = ? WHERE id = ?",
       values: [OfficerID, numericId],
     });
+
+    if (updateResult.affectedRows === 0) {
+      throw new Error("Failed to update OfficerID for new officer");
+    }
 
     return NextResponse.json({ message: "Admin officer created successfully", OfficerID });
   } catch (e) {
