@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +13,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { addProduct } from "@/lib/api";
 
@@ -24,9 +33,13 @@ const formSchema = z.object({
     .min(10, "Description must be at least 10 characters."),
   price: z.coerce.number().positive("Price must be a positive number."),
   category: z.string().min(2, "Category is required."),
+  businessUnitId: z.string().min(1, "Please select a business unit."),
 });
 
-export function AddProductForm() {
+export function AddProductForm({ units, onProductAdded }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,18 +47,23 @@ export function AddProductForm() {
       description: "",
       price: 0,
       category: "",
+      businessUnitId: "",
     },
   });
 
   async function onSubmit(values) {
-    console.log("Submitting product:", values);
+    setIsLoading(true);
+    setError("");
+    setSuccess(false);
     try {
       await addProduct(values);
-      // TODO: Add toast notification for success
+      setSuccess(true);
       form.reset();
-    } catch (error) {
-      console.error("Failed to add product", error);
-      // TODO: Add toast notification for error
+      if (onProductAdded) onProductAdded();
+    } catch (err) {
+      setError("Failed to add product.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -57,6 +75,36 @@ export function AddProductForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="businessUnitId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Unit</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a business unit" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {units.map((unit) => (
+                        <SelectItem key={unit.id} value={unit.id.toString()}>
+                          {unit.BUnitName || unit.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    The business unit this product will belong to.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="name"
@@ -112,7 +160,15 @@ export function AddProductForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Add Product</Button>
+            {success && (
+              <div className="text-green-600 text-sm">
+                Product added successfully!
+              </div>
+            )}
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Adding..." : "Add Product"}
+            </Button>
           </form>
         </Form>
       </CardContent>

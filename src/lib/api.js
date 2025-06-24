@@ -71,8 +71,18 @@ export const login = async ({ role, id, password }) => {
   return res.data;
 };
 
-export const registerAdmin = async ({ email, password }) => {
-  const res = await apiClient.post("/api/register-admin", { email, password });
+export const registerAdmin = async ({
+  OfficerName,
+  OfficerEmailAddress,
+  OfficerPhoneNo,
+  OfficerPassword,
+}) => {
+  const res = await apiClient.post("/api/register-admin", {
+    OfficerName,
+    OfficerEmailAddress,
+    OfficerPhoneNo,
+    OfficerPassword,
+  });
   return res.data;
 };
 
