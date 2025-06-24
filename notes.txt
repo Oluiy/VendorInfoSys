@@ -1,0 +1,6 @@
+API ENDPOINTS READY FOR USE 
+signup(Signing up ADMIN officer) --> api/register-admin
+login(AdminOfficer, Manager) --> api/login
+Onboarding(Managers) -->api/managers/onboard
+Onboarding(Vendors) -->api/vendors/onboard
+

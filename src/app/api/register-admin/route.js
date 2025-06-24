@@ -4,32 +4,46 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { OfficerName, OfficerEmailAddress, OfficerPhoneNo, OfficerPassword } = await request.json();
+    const hashedPassword = await bcrypt.hash(OfficerPassword, 10);
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const registerAdmin = await query({
-      query:
-        "INSERT INTO Users (Email, Password, Role) VALUES (?, ?, 'admin')",
-      values: [email, hashedPassword],
+    // Insert officer
+    const insertResult = await query({
+      query: `
+        INSERT INTO AdminOfficer (OfficerName, OfficerEmailAddress, OfficerPhoneNo, OfficerPassword)
+        VALUES (?, ?, ?, ?)
+      `,
+      values: [OfficerName, OfficerEmailAddress, OfficerPhoneNo, hashedPassword],
     });
 
-    const result = registerAdmin.affectedRows;
-    let message = "";
-    if (result) {
-      message = "Admin user created successfully";
-    } else {
-      message = "Failed to create admin user";
+    let numericId = insertResult.insertId
+    if (!numericId) {
+      const getId = await query({
+        query: "SELECT LAST_INSERT_ID() as id",
+        values: [],
+      });
+      numericId = getId[0]?.id;
+    }
+    const OfficerID = "ADM" + numericId;
+
+    // Log for debugging
+    console.log("Updating OfficerID for id:", numericId, "to", OfficerID);
+
+    // Update OfficerID
+    const updateResult = await query({
+      query: "UPDATE AdminOfficer SET OfficerID = ? WHERE id = ?",
+      values: [OfficerID, numericId],
+    });
+
+    if (updateResult.affectedRows === 0) {
+      throw new Error("Failed to update OfficerID for new officer");
     }
 
-    return NextResponse.json({ message: message });
+    return NextResponse.json({ message: "Admin officer created successfully", OfficerID });
   } catch (e) {
     return NextResponse.json(
       { message: e.message },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
-} 
+}
