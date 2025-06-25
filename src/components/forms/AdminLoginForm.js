@@ -7,6 +7,8 @@ import * as z from "zod";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { login as loginApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,8 +28,9 @@ const formSchema = z.object({
 
 export function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const { login } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -39,7 +42,6 @@ export function AdminLoginForm() {
 
   async function onSubmit(values) {
     setIsLoading(true);
-    setError("");
     try {
       const user = await loginApi({
         role: "admin",
@@ -47,8 +49,15 @@ export function AdminLoginForm() {
         password: values.password,
       });
       login({ ...user, role: "admin" });
+      toast({ title: "Login successful!", duration: 2000 });
+      setTimeout(() => router.push("/admin"), 2000);
     } catch (err) {
-      setError("Invalid Officer ID or password");
+      toast({
+        title: "Login failed",
+        description: "Invalid Officer ID or password",
+        variant: "destructive",
+        duration: 2000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +92,6 @@ export function AdminLoginForm() {
             </FormItem>
           )}
         />
-        {error && <div className="text-red-500 text-sm">{error}</div>}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Login

@@ -12,14 +12,14 @@ export async function POST(request) {
   try {
     // const token = request.headers.get("authorization")?.replace("Bearer ", "");
     // const officerId = await getOfficerIdFromToken(token); 
-    const officerId = "ADM10";
+    const officerId = "ADM15";
 
     if (!officerId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { ManagerName, ManagerEmailAddress, ManagerPhoneNo, password,} = await request.json();
-    const plainPassword = password || generatePassword(ManagerName);
+    const { ManagerName, ManagerEmailAddress, ManagerPhoneNo } = await request.json();
+    const plainPassword = generatePassword(ManagerName);
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
     const insertResult = await query({
@@ -57,15 +57,3 @@ export async function POST(request) {
   }
 } 
 
-// src/app/api/managers/route.js
-export async function GET(request) {
-  try {
-    const managers = await query({
-      query: "SELECT COUNT(*) AS count FROM Manager",
-      values: [],
-    });
-    return NextResponse.json(managers);
-  } catch (e) {
-    return NextResponse.json({ message: e.message }, { status: 500 });
-  }
-}

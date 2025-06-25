@@ -11,15 +11,16 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
+    let numericId = Math.floor(11 + Math.random() * 10);
+    let BUnitId = "BU0" + numericId;
     const result = await query({
-      query: "INSERT INTO BusinessUnit (BUnitName, Location) VALUES (?, ?)",
-      values: [BUnitName, Location],
+      query: "INSERT INTO BusinessUnit (BUnitId, BUnitName, Location) VALUES (? , ?, ?)",
+      values: [BUnitId, BUnitName, Location],
     });
 
     return NextResponse.json({
       message: "Business Unit created successfully",
-      BUnitID: result.insertId,
+      BUnitID: BUnitId,
       BUnitName,
       Location,
     });
@@ -29,7 +30,7 @@ export async function POST(request) {
 } 
 
 
-// src/app/api/business-units/route.js
+// // src/app/api/business-units/route.js
 export async function GET(request) {
   try {
     const units = await query({

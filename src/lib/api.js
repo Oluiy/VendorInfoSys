@@ -95,8 +95,14 @@ export const createBusinessUnit = async ({ BUnitName, Location }) => {
   return res.data;
 };
 
+
 export const getStandaloneBusinessUnits = async () => {
   const res = await apiClient.get("/api/business-units");
+  return res.data;
+};
+
+export const getAllStandaloneBusinessUnits = async () => {
+  const res = await apiClient.get("/api/business-units/all");
   return res.data;
 };
 
@@ -135,6 +141,11 @@ export const getVendors = async () => {
   return res.data;
 };
 
+export const getAllVendors = async () =>{
+  const res = await apiClient.get("/api/vendors/multi-unit");
+  return res.data;
+}
+
 export const getLatestVendorRegistration = async () => {
   const res = await apiClient.get("/api/vendors/registrations/latest");
   return res.data;
@@ -142,6 +153,11 @@ export const getLatestVendorRegistration = async () => {
 
 export const getMultiUnitVendors = async () => {
   const res = await apiClient.get("/api/vendors/multi-unit");
+  return res.data;
+};
+
+export const getAllManagers = async () => {
+  const res = await apiClient.get("/api/managers/all");
   return res.data;
 };
 

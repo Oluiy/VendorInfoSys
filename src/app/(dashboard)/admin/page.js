@@ -59,11 +59,10 @@ export default function AdminDashboardPage() {
   const [vendors, setVendors] = useState([]);
   const [managers, setManagers] = useState([]);
   const [units, setUnits] = useState([]);
+  const [productCount, setProductCount] = useState(0);
   const [productCountByUnit, setProductCountByUnit] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showVendorModal, setShowVendorModal] = useState(false);
-  const [showManagerModal, setShowManagerModal] = useState(false);
   const [vendorForm, setVendorForm] = useState({
     name: "",
     email: "",
@@ -84,22 +83,34 @@ export default function AdminDashboardPage() {
   const [managerError, setManagerError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
     Promise.all([
-      getVendors().catch(() => []),
-      getManagers().catch(() => []),
-      getStandaloneBusinessUnits().catch(() => []),
-      getProductCountByUnit().catch(() => []),
+      getVendors(),
+      getManagers(),
+      getStandaloneBusinessUnits(),
+      getProducts(), // returns a number
+      getProductCountByUnit(), // returns an array
     ])
-      .then(([vendorsData, managersData, unitsData, productCountData]) => {
-        setVendors(Array.isArray(vendorsData) ? vendorsData : []);
-        setManagers(Array.isArray(managersData) ? managersData : []);
-        setUnits(Array.isArray(unitsData) ? unitsData : []);
-        setProductCountByUnit(
-          Array.isArray(productCountData) ? productCountData : []
-        );
-      })
+      .then(
+        ([
+          vendorsData,
+          managersData,
+          unitsData,
+          productCount,
+          productCountData,
+        ]) => {
+          setVendors(vendorsData);
+          setManagers(managersData);
+          setUnits(unitsData);
+          setProductCount(productCountData);
+          const chartData = Array.isArray(productCount)
+            ? productCount.map((item) => ({
+                unit: item.BUnitName,
+                count: item.ProductCount,
+              }))
+            : [];
+          setProductCountByUnit(chartData);
+        }
+      )
       .catch(() => setError("Failed to load dashboard data."))
       .finally(() => setLoading(false));
   }, []);
@@ -176,21 +187,15 @@ export default function AdminDashboardPage() {
         <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">
-              {Array.isArray(vendors) ? vendors.length : 0}
-            </div>
+            <div className="text-2xl font-bold">{vendors}</div>
             <div className="text-muted-foreground">Vendors</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">
-              {Array.isArray(managers) ? managers.length : 0}
-            </div>
+            <div className="text-2xl font-bold">{managers}</div>
             <div className="text-muted-foreground">Managers</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">
-              {Array.isArray(units) ? units.length : 0}
-            </div>
+            <div className="text-2xl font-bold">{units}</div>
             <div className="text-muted-foreground">Business Units</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">

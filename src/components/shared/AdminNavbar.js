@@ -10,7 +10,7 @@ const navLinks = [
   { href: "/admin/vendors", label: "Vendors" },
   { href: "/admin/managers", label: "Managers" },
   { href: "/admin/business-units", label: "Active Business Units" },
-  { href: "/admin/products-count-by-unit", label: "Products" },
+  { href: "/admin/products", label: "Products" },
 ];
 
 export default function AdminNavbar() {

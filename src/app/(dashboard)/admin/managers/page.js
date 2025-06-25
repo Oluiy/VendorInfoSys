@@ -3,23 +3,18 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { getManagers } from "@/lib/api";
+import { getAllManagers } from "@/lib/api";
 
 export default function ManagersPage() {
   const [managers, setManagers] = useState([]);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-  });
+  const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   const fetchManagers = async () => {
     try {
-      const data = await getManagers();
+      const data = await getAllManagers();
       setManagers(Array.isArray(data) ? data : []);
     } catch {
       setManagers([]);
@@ -39,7 +34,11 @@ export default function ManagersPage() {
       const res = await fetch("/api/managers/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+            ManagerName: form.name,
+            ManagerEmail: form.email,
+            ManagerPhoneNo: form.phone
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to onboard manager");
@@ -48,7 +47,7 @@ export default function ManagersPage() {
           data.ManagerID || data.id || "(unknown)"
         }`
       );
-      setForm({ name: "", email: "", phone: "", password: "" });
+      setForm({ name: "", email: "", phone: "" });
       fetchManagers();
     } catch (err) {
       setError(err.message || "Failed to onboard manager");
@@ -65,7 +64,7 @@ export default function ManagersPage() {
           onSubmit={handleSubmit}
           className="space-y-4 bg-card p-4 rounded-lg shadow"
         >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Name</Label>
               <Input
@@ -93,17 +92,6 @@ export default function ManagersPage() {
                 value={form.phone}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, phone: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <div>
-              <Label>Password</Label>
-              <Input
-                type="password"
-                value={form.password}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, password: e.target.value }))
                 }
                 required
               />
@@ -146,10 +134,10 @@ export default function ManagersPage() {
                       {manager.name || manager.ManagerName}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap">
-                      {manager.email || manager.ManagerEmail}
+                      {manager.email || manager.ManagerEmailAddress}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap">
-                      {manager.phone || manager.ManagerPhone}
+                      {manager.phone || manager.ManagerPhoneNo}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap">
                       {manager.ManagerID || manager.id || "-"}

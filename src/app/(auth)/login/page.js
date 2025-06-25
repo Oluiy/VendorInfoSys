@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { registerAdmin } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   OfficerName: z.string().min(1, "Full name is required"),
@@ -22,8 +24,6 @@ const formSchema = z.object({
 
 const AdminRegisterForm = ({ onSwitchToLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const {
     register,
     handleSubmit,
@@ -32,17 +32,29 @@ const AdminRegisterForm = ({ onSwitchToLogin }) => {
   } = useForm({
     resolver: zodResolver(formSchema),
   });
+  const { toast } = useToast();
+  const router = useRouter();
 
   const onSubmit = async (data) => {
     setIsLoading(true);
-    setError("");
-    setSuccess(false);
     try {
-      await registerAdmin(data);
-      setSuccess(true);
+      const res = await registerAdmin(data);
+      toast({
+        title: "Registration successful!",
+        description: `Your Admin Officer ID is: ${
+          res.OfficerID || res.id || "(unknown)"
+        }`,
+        duration: 2000,
+      });
       reset();
+      setTimeout(() => router.push("/admin"), 2000);
     } catch (err) {
-      setError("Failed to register. Please try again.");
+      toast({
+        title: "Registration failed",
+        description: "Please try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -108,14 +120,6 @@ const AdminRegisterForm = ({ onSwitchToLogin }) => {
             </p>
           )}
         </div>
-        {error && (
-          <div className="text-sm text-red-500 text-center">{error}</div>
-        )}
-        {success && (
-          <div className="text-sm text-green-600 text-center">
-            Registration successful! You can now sign in.
-          </div>
-        )}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>

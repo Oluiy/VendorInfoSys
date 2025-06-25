@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { getStandaloneBusinessUnits } from "@/lib/api";
+import { getAllStandaloneBusinessUnits } from "@/lib/api";
 
 export default function BusinessUnitsPage() {
   const [units, setUnits] = useState([]);
@@ -14,7 +14,7 @@ export default function BusinessUnitsPage() {
 
   const fetchUnits = async () => {
     try {
-      const data = await getStandaloneBusinessUnits();
+      const data = await getAllStandaloneBusinessUnits();
       setUnits(Array.isArray(data) ? data : []);
     } catch {
       setUnits([]);
