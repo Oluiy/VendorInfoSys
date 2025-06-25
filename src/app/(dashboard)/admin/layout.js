@@ -1,12 +1,10 @@
 import React from "react";
 
-const AdminLayout = ({ children }) => {
+export default function AdminLayout({ children }) {
   return (
-    <div>
+    <div className="p-6">
       {/* Admin specific sidebar or navbar can go here */}
       <main>{children}</main>
     </div>
   );
-};
-
-export default AdminLayout;
+}

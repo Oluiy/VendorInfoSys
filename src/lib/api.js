@@ -148,7 +148,7 @@ export const getMultiUnitVendors = async () => {
 export const getManagers = async () => {
   const res = await apiClient.get("/api/managers");
   return res.data;
-}
+};
 
 // ------------------- EMPLOYEES & OFFICERS -------------------
 export const getEmployeesWithSupervisors = async () => {
@@ -173,7 +173,7 @@ export const getOfficersWithoutRegistrations = async () => {
 
 // ------------------- REPORTS -------------------
 export const getProductCountByUnit = async () => {
-  const res = await apiClient.get("/api/products");
+  const res = await apiClient.get("/api/reports/product-count-by-unit");
   return res.data;
 };
 

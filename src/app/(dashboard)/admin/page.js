@@ -13,10 +13,19 @@ import {
 import {
   getVendors,
   getStandaloneBusinessUnits,
-  getProductsWithDetails,
   getProductCountByUnit,
   getManagers,
 } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -49,39 +58,110 @@ export default function AdminDashboardPage() {
   const [vendors, setVendors] = useState([]);
   const [managers, setManagers] = useState([]);
   const [units, setUnits] = useState([]);
-  const [products, setProducts] = useState([]);
   const [productCountByUnit, setProductCountByUnit] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showVendorModal, setShowVendorModal] = useState(false);
+  const [showManagerModal, setShowManagerModal] = useState(false);
+  const [vendorForm, setVendorForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [managerForm, setManagerForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [vendorSuccess, setVendorSuccess] = useState("");
+  const [managerSuccess, setManagerSuccess] = useState("");
+  const [vendorLoading, setVendorLoading] = useState(false);
+  const [managerLoading, setManagerLoading] = useState(false);
+  const [vendorError, setVendorError] = useState("");
+  const [managerError, setManagerError] = useState("");
 
   useEffect(() => {
     setLoading(true);
     setError("");
     Promise.all([
-      getVendors(),                  
-      getManagers(),                 
-      getStandaloneBusinessUnits(),  
-      getProductsWithDetails(),      
-      getProductCountByUnit(),       
+      getVendors().catch(() => []),
+      getManagers().catch(() => []),
+      getStandaloneBusinessUnits().catch(() => []),
+      getProductCountByUnit().catch(() => []),
     ])
-      .then(
-        ([
-          vendorsData,
-          managersData,
-          unitsData,
-          productsData,
-          productCountData,
-        ]) => {
-          setVendors(vendorsData);
-          setManagers(managersData);
-          setUnits(unitsData);
-          setProducts(productsData);
-          setProductCountByUnit(productCountData);
-        }
-      )
+      .then(([vendorsData, managersData, unitsData, productCountData]) => {
+        setVendors(Array.isArray(vendorsData) ? vendorsData : []);
+        setManagers(Array.isArray(managersData) ? managersData : []);
+        setUnits(Array.isArray(unitsData) ? unitsData : []);
+        setProductCountByUnit(
+          Array.isArray(productCountData) ? productCountData : []
+        );
+      })
       .catch(() => setError("Failed to load dashboard data."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Prepare chart data for Products per Business Unit
+  const chartData =
+    Array.isArray(productCountByUnit) && productCountByUnit.length > 0
+      ? productCountByUnit
+      : units.map((unit) => ({ unit: unit.BUnitName || unit.name, count: 0 }));
+
+  // Onboard Vendor
+  const handleVendorSubmit = async (e) => {
+    e.preventDefault();
+    setVendorLoading(true);
+    setVendorError("");
+    setVendorSuccess("");
+    try {
+      const res = await fetch("/api/vendors/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: vendorForm.name,
+          email: vendorForm.email,
+          phone: vendorForm.phone,
+          password: vendorForm.password,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to onboard vendor");
+      setVendorSuccess("Vendor onboarded successfully!");
+      setVendorForm({ name: "", email: "", phone: "", password: "" });
+    } catch (err) {
+      setVendorError("Failed to onboard vendor");
+    } finally {
+      setVendorLoading(false);
+    }
+  };
+
+  // Onboard Manager
+  const handleManagerSubmit = async (e) => {
+    e.preventDefault();
+    setManagerLoading(true);
+    setManagerError("");
+    setManagerSuccess("");
+    try {
+      const res = await fetch("/api/managers/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: managerForm.name,
+          email: managerForm.email,
+          phone: managerForm.phone,
+          password: managerForm.password,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to onboard manager");
+      setManagerSuccess("Manager onboarded successfully!");
+      setManagerForm({ name: "", email: "", phone: "", password: "" });
+    } catch (err) {
+      setManagerError("Failed to onboard manager");
+    } finally {
+      setManagerLoading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -95,19 +175,29 @@ export default function AdminDashboardPage() {
         <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{vendors}</div>
+            <div className="text-2xl font-bold">
+              {Array.isArray(vendors) ? vendors.length : 0}
+            </div>
             <div className="text-muted-foreground">Vendors</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{managers}</div>
+            <div className="text-2xl font-bold">
+              {Array.isArray(managers) ? managers.length : 0}
+            </div>
             <div className="text-muted-foreground">Managers</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{units}</div>
+            <div className="text-2xl font-bold">
+              {Array.isArray(units) ? units.length : 0}
+            </div>
             <div className="text-muted-foreground">Business Units</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{productCountByUnit}</div>
+            <div className="text-2xl font-bold">
+              {Array.isArray(productCountByUnit)
+                ? productCountByUnit.reduce((acc, u) => acc + (u.count || 0), 0)
+                : 0}
+            </div>
             <div className="text-muted-foreground">Products</div>
           </div>
         </div>
@@ -116,7 +206,7 @@ export default function AdminDashboardPage() {
           <div className="w-full h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={[products, productCountByUnit]}
+                data={chartData}
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
