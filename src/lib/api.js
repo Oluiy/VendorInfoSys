@@ -66,7 +66,7 @@ const MOCK_PRODUCTS = [
 export const login = async ({ role, id, password }) => {
   // role: 'admin' or 'vendor', id: adminID or vendorID
   const body =
-    role === "admin" ? { adminID: id, password } : { vendorID: id, password };
+    role === "admin" ? { ADMID: id, password } : { MGRID: id, password };
   const res = await apiClient.post("/api/login", body);
   return res.data;
 };
@@ -96,7 +96,7 @@ export const createBusinessUnit = async ({ BUnitName, Location }) => {
 };
 
 export const getStandaloneBusinessUnits = async () => {
-  const res = await apiClient.get("/api/business-units/standalone");
+  const res = await apiClient.get("/api/business-units");
   return res.data;
 };
 
@@ -145,6 +145,11 @@ export const getMultiUnitVendors = async () => {
   return res.data;
 };
 
+export const getManagers = async () => {
+  const res = await apiClient.get("/api/managers");
+  return res.data;
+}
+
 // ------------------- EMPLOYEES & OFFICERS -------------------
 export const getEmployeesWithSupervisors = async () => {
   const res = await apiClient.get("/api/employees/with-supervisors");
@@ -168,6 +173,11 @@ export const getOfficersWithoutRegistrations = async () => {
 
 // ------------------- REPORTS -------------------
 export const getProductCountByUnit = async () => {
+  const res = await apiClient.get("/api/products");
+  return res.data;
+};
+
+export const getProduct = async () => {
   const res = await apiClient.get("/api/reports/product-count-by-unit");
   return res.data;
 };

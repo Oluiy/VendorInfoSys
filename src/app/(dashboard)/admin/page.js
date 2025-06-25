@@ -12,10 +12,10 @@ import {
 } from "recharts";
 import {
   getVendors,
-  getEmployeesWithSupervisors,
   getStandaloneBusinessUnits,
   getProductsWithDetails,
   getProductCountByUnit,
+  getManagers,
 } from "@/lib/api";
 
 const containerVariants = {
@@ -58,11 +58,11 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError("");
     Promise.all([
-      getVendors(),
-      getEmployeesWithSupervisors(),
-      getStandaloneBusinessUnits(),
-      getProductsWithDetails(),
-      getProductCountByUnit(),
+      getVendors(),                  
+      getManagers(),                 
+      getStandaloneBusinessUnits(),  
+      getProductsWithDetails(),      
+      getProductCountByUnit(),       
     ])
       .then(
         ([
@@ -95,19 +95,19 @@ export default function AdminDashboardPage() {
         <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{vendors.length}</div>
+            <div className="text-2xl font-bold">{vendors}</div>
             <div className="text-muted-foreground">Vendors</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{managers.length}</div>
+            <div className="text-2xl font-bold">{managers}</div>
             <div className="text-muted-foreground">Managers</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{units.length}</div>
+            <div className="text-2xl font-bold">{units}</div>
             <div className="text-muted-foreground">Business Units</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{products.length}</div>
+            <div className="text-2xl font-bold">{productCountByUnit}</div>
             <div className="text-muted-foreground">Products</div>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function AdminDashboardPage() {
           <div className="w-full h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={productCountByUnit}
+                data={[products, productCountByUnit]}
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />

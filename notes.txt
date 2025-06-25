@@ -4,3 +4,9 @@ login(AdminOfficer, Manager) --> api/login
 Onboarding(Managers) -->api/managers/onboard
 Onboarding(Vendors) -->api/vendors/onboard
 
+COUNTING FUNCTION READY FOR USE
+Managers --> api/managers
+Vendors --> api/vendors
+BusinessUnit --> api/BusinessUnit
+Products --> api/products
+

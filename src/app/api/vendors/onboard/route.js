@@ -10,9 +10,9 @@ function generatePassword(name) {
 
 export async function POST(request) {
   try {
-    const token = request.headers.get("authorization")?.replace("Bearer ", "");
-    const officerId = await getOfficerIdFromToken(token); 
-    // const officerId = "ADM10";
+    // const token = request.headers.get("authorization")?.replace("Bearer ", "");
+    // const officerId = await getOfficerIdFromToken(token); 
+    const officerId = "ADM10";
 
     if (!officerId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

@@ -56,3 +56,16 @@ export async function POST(request) {
     return NextResponse.json({ message: e.message }, { status: 500 });
   }
 } 
+
+// src/app/api/managers/route.js
+export async function GET(request) {
+  try {
+    const managers = await query({
+      query: "SELECT COUNT(*) AS count FROM Manager",
+      values: [],
+    });
+    return NextResponse.json(managers);
+  } catch (e) {
+    return NextResponse.json({ message: e.message }, { status: 500 });
+  }
+}

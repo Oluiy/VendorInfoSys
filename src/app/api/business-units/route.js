@@ -27,3 +27,17 @@ export async function POST(request) {
     return NextResponse.json({ message: e.message }, { status: 500 });
   }
 } 
+
+
+// src/app/api/business-units/route.js
+export async function GET(request) {
+  try {
+    const units = await query({
+      query: "SELECT COUNT(*) AS count FROM BusinessUnit",
+      values: [],
+    });
+    return NextResponse.json(units[0]["count"]);
+  } catch (e) {
+    return NextResponse.json({ message: e.message }, { status: 500 });
+  }
+}
