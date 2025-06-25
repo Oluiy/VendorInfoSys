@@ -177,7 +177,7 @@ export const getProductCountByUnit = async () => {
   return res.data;
 };
 
-export const getProduct = async () => {
+export const getProducts = async () => {
   const res = await apiClient.get("/api/reports/product-count-by-unit");
   return res.data;
 };
