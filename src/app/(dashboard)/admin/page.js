@@ -16,6 +16,7 @@ import {
   getProductsWithDetails,
   getProductCountByUnit,
   getManagers,
+  getProducts,
 } from "@/lib/api";
 
 const containerVariants = {
@@ -49,38 +50,35 @@ export default function AdminDashboardPage() {
   const [vendors, setVendors] = useState([]);
   const [managers, setManagers] = useState([]);
   const [units, setUnits] = useState([]);
-  const [products, setProducts] = useState([]);
+  // const [products, setProducts] = useState([]);
+  const [productCount, setProductCount] = useState(0);
   const [productCountByUnit, setProductCountByUnit] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    Promise.all([
-      getVendors(),                  
-      getManagers(),                 
-      getStandaloneBusinessUnits(),  
-      getProductsWithDetails(),      
-      getProductCountByUnit(),       
-    ])
-      .then(
-        ([
-          vendorsData,
-          managersData,
-          unitsData,
-          productsData,
-          productCountData,
-        ]) => {
-          setVendors(vendorsData);
-          setManagers(managersData);
-          setUnits(unitsData);
-          setProducts(productsData);
-          setProductCountByUnit(productCountData);
-        }
-      )
-      .catch(() => setError("Failed to load dashboard data."))
-      .finally(() => setLoading(false));
+
+useEffect(() => {
+  Promise.all([
+    getVendors(),
+    getManagers(),
+    getStandaloneBusinessUnits(),
+    getProducts(), // returns a number
+    getProductCountByUnit(), // returns an array
+  ]).then(([vendorsData, managersData, unitsData, productCount, productCountData]) => {
+    setVendors(vendorsData);
+    setManagers(managersData);
+    setUnits(unitsData);
+    setProductCount(productCountData);
+    const chartData = Array.isArray(productCount)
+      ? productCount.map(item => ({
+          unit: item.BUnitName,
+          count: item.ProductCount,
+        }))
+      : [];
+    setProductCountByUnit(chartData);
+  })  
+  .catch(() => setError("Failed to load dashboard data."))
+  .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -107,7 +105,7 @@ export default function AdminDashboardPage() {
             <div className="text-muted-foreground">Business Units</div>
           </div>
           <div className="bg-muted rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold">{productCountByUnit}</div>
+            <div className="text-2xl font-bold">{productCount}</div>
             <div className="text-muted-foreground">Products</div>
           </div>
         </div>
@@ -116,7 +114,7 @@ export default function AdminDashboardPage() {
           <div className="w-full h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={[products, productCountByUnit]}
+                data={productCountByUnit} 
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
